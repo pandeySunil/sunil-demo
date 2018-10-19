@@ -1,0 +1,110 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using LoginSystem.Models;
+using System.Data.SqlClient;
+using System.Data;
+
+namespace LoginSystem.Controllers
+{
+    public class HomeController : Controller
+    {
+        public LoginSystemDbEntities db;
+
+        private DataTable dataTable = new DataTable();
+
+        public HomeController()
+        {
+            this.db = new LoginSystemDbEntities();
+
+        }
+        public ActionResult Index()
+        {
+            return View();
+        }
+
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ValidUser(User user) {
+            if (user == null)
+            {
+                return RedirectToAction("Login");
+            }
+            var userRecords = db.Users;
+            if (userRecords != null)
+            {
+                var enteredUser = userRecords.FirstOrDefault(u => u.UserName == user.UserName);
+                if (enteredUser.Password == user.Password)
+                {
+                    return RedirectToAction("DashBoard");
+                };
+            }
+            return RedirectToAction("DashBoard");
+        }
+        public ActionResult Login(User user)
+        {
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult CreateUser(User user)
+        {
+                var userRecords = db.Users;
+                user.Id = userRecords.Count()+1;
+            if (user != null && user.UserName != null && user.Password != null) {
+                var alreadyCreatedUsersCount = db.Users.Where(u => u.UserName == user.UserName).Count();
+                if (alreadyCreatedUsersCount > 0) {
+                    return RedirectToAction("Index");
+                }
+                db.Users.Add(user);
+                db.SaveChanges();
+            }
+            else
+            {
+                return RedirectToAction("Index");
+
+            }
+            return View();
+
+        }
+        public ActionResult DashBoard() {
+            var userRecords = db.Users;
+            return View(userRecords);
+        }
+        public ActionResult DataAction() {
+            try {
+
+
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString =
+                "Data Source=DESKTOP-6G1H7Q6;" +
+                "Initial Catalog=LoginSystemDb;" +
+                "User id=sa;" +
+                "Password=apachertr31@;";
+                conn.Open();
+
+               
+                SqlCommand sqlcmd = new SqlCommand("Select * From users", conn);
+                //var data = sqlcmd.ExecuteReader();
+                //if (data.Read())
+                //{
+                //    var row = data[0];
+                //   // var rowOneData = row[0];
+                //}
+                SqlDataAdapter da = new SqlDataAdapter(sqlcmd);
+                // this will query your database and return the result to your datatable
+                da.Fill(dataTable);
+                var colunm = dataTable.Columns[0];
+                conn.Close();
+            }
+            catch (Exception Ex) {
+
+            }
+           
+            return View();
+        }
+    }
+}
