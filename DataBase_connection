@@ -1,0 +1,126 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Data;
+
+
+namespace WebApplication3
+{
+    public partial class WebForm1 : System.Web.UI.Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+
+            DataTable dt = new DataTable();
+            //dt.Columns.Add("Name", typeof(String));
+            //dt.Rows.Add("Sunil");
+            //GridView1.DataSource = dt;
+            //DataColumn dataColumn = new DataColumn("UserName");
+            //GridView1.DataSource = dt;
+            //GridView1.DataBind();
+            // // GridViewRow gridViewRow = new GridViewRow();
+            // var c = GridView1.Columns;
+
+            try
+            {
+
+
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString =
+                "Data Source=DESKTOP-6G1H7Q6;" +
+                "Initial Catalog=LoginSystemDb;" +
+                "User id=sa;" +
+                "Password=apachertr31@;";
+                conn.Open();
+
+
+                SqlCommand sqlcmd = new SqlCommand("Select * From users", conn);
+
+                SqlDataAdapter da = new SqlDataAdapter(sqlcmd);
+
+                da.Fill(dt);
+                ArticeGridView.DataSource = dt;
+                ArticeGridView.DataBind();
+                conn.Close();
+            }
+
+            catch (Exception Ex)
+            {
+
+            }
+
+
+        }
+
+        protected void ArticeGridView_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+        protected void ArticeGridView_RowCommand(object sender, System.Web.UI.WebControls.GridViewCommandEventArgs e)
+        {
+            if (e.CommandName == "MyButtonClick")
+            {
+                //Get rowindex
+                int rowindex = Convert.ToInt32(e.CommandArgument);
+                //Get Row
+                GridViewRow gvr = ArticeGridView.Rows[rowindex];
+            }
+        }
+        public void delete(object sender, System.EventArgs e)
+        {
+            Button btn = (Button)sender;
+
+            try
+            {
+                //Get the row that contains this button
+                GridViewRow gvr = (GridViewRow)btn.NamingContainer;
+                var index = gvr.DataItemIndex;
+
+                //Get Row
+              
+              //  GridViewRow gvrData = ArticeGridView.Rows[index].col;
+                SqlConnection conn = new SqlConnection();
+                conn.ConnectionString =
+                "Data Source=DESKTOP-6G1H7Q6;" +
+                "Initial Catalog=LoginSystemDb;" +
+                "User id=sa;" +
+                "Password=apachertr31@;";
+                conn.Open();
+                GridViewRow selectedRow = (GridViewRow)btn.NamingContainer;
+                string UserId = selectedRow.Cells[2].Text;
+                
+            
+               
+                string query = "Delete  From users where Id =" + UserId;
+                SqlCommand sqlcmd = new SqlCommand(query, conn);
+                sqlcmd.ExecuteNonQuery();
+                conn.Close();
+                Response.Redirect("WebForm1.aspx");
+            }
+        //    SqlDataAdapter da = new SqlDataAdapter(sqlcmd);
+
+            //    da.Fill(dt);
+            //    ArticeGridView.DataSource = dt;
+            //    ArticeGridView.DataBind();
+            //    conn.Close();
+            //}
+
+              catch (Exception Ex)
+            {
+
+            }
+
+
+        }
+    }
+        }
+   
+    //protected void ArticeGridView_RowDeleting(object sender, GridViewDeleteEventArgs e)
+    //{
+
+    //}
+
